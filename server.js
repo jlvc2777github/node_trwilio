@@ -84,6 +84,8 @@ app.use(cors(corsOptions));
 
 //const client = twilio.client;
 
+app.get("/",(req,res)=>console.log("Pagina de Twilio Calls"));
+
 app.get("/test",(req,res)=>{
     res.send("Welcome Twilio");
 });
