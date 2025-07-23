@@ -221,7 +221,7 @@ app.get('/call-normal/:to', (req, res) => {
     res.send(response.toString());
   });
 
-  dial-status
+  
 
 /** 
  * *
