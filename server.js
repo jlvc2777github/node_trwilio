@@ -90,6 +90,10 @@ app.get("/test",(req,res)=>{
     res.send("Welcome Twilio");
 });
 
+app.get("/about",(req,res)=>{
+    res.send("Telefonia de Kalos");
+});
+
 app.post("/check-token",(req,res)=>{
     const {token} = req.body;
     let isValid = false;
@@ -217,7 +221,7 @@ app.get('/call-normal/:to', (req, res) => {
     res.send(response.toString());
   });
 
-  
+  dial-status
 
 /** 
  * *
