@@ -7,7 +7,7 @@ const http = require("http");
 const { createJwt,verifyToken } = require("./utils/Jwt.js");
 const twilioLib = require("twilio");
 
-
+const host = "https://node-trwilio.onrender.com";
 const app= express();
 const server = http.createServer(app);
 
@@ -208,13 +208,14 @@ app.post("/get-call", async (req,res)=>{
     }
 });
 
-
+// no funciona
 app.get('/call-normal/:to', (req, res) => {
    // const to = req.query.to || '+521234567890';
     const to  = req.params.to;
     console.log("llamando al num: ",req.params.to);
     const response = new twilioLib.twiml.VoiceResponse();
-    const dial = response.dial({ callerId: twilioPhoneNumber });
+   // const dial = response.dial({ callerId: twilioPhoneNumber });
+    const dial = response.dial({ callerId: req.params.to });
     dial.number(to);
     //response.dial(to);
     res.type('text/xml');
@@ -296,7 +297,23 @@ app.post("/connect-call",(req,res)=>{
 }) 
 
 
+// si funciona
+app.post('/transfers', (req, res) => {
+    console.log("voices",req.body);
+    const twiml = new twilioLib.twiml.VoiceResponse();
+    socketIo.emit("call-new",{data:req.body})
+    const mensaje = req.body.mensaje || 'Kalos te agradece comunicarte con nosotros y transfer';
+    const voz = req.body.voz || 'alice';
+    
+    twiml.say({ voice: voz,language: 'es-ES'  }, mensaje);
+    twiml.redirect(`${host}/dial-status`);
+   // twiml.redirect("https://callcenter.loca.lt/dial-status");
 
+    res.type('text/xml');
+    res.send(twiml.toString());
+});
+
+// si funciona
 app.post("/dial-status", (req, res) => {
     const twiml = new twilioLib.twiml.VoiceResponse();
     const dialCallStatus = req.body.DialCallStatus;
@@ -324,10 +341,30 @@ app.post("/dial-status", (req, res) => {
         // Puedes añadir aquí lógica si necesitas interactuar mientras el Dial está activo
         // Por ejemplo, si el Dial está configurado para un tiempo de espera muy largo.
         twiml.say('La llamada sigue en curso con el agente.');
+        //twiml.pause({length: 15});
+/*         twiml.record({
+            timeout: 15,
+            transcribe: true
+        }); */
+        twiml.record({
+            transcribe: true, // This is key! It tells Twilio to transcribe the recording.
+           // transcribeCallbackUrl: 'https://your-server.com/transcription-complete' // Optional: a URL to notify when transcription is ready
+        });
+        console.log(twiml.toString()); 
+        twiml.say('Finaliza la llamada.');
     }
 
     res.type('text/xml');
     res.send(twiml.toString());
+/*     res.send(
+        `<Response>
+            <Say>
+                Start speaking to see your audio transcribed in the console
+            </Say>
+            <Pause length='30'
+        </Response>
+        `
+    );  */
 });
 
 // Endpoint para manejar la entrada del usuario después de la opción
